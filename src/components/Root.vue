@@ -104,7 +104,6 @@ export default {
 
 <style scoped>
   .controls-group {
-    /*border: 1px solid #ccc;*/
     padding: 5px;
     display: inline-block;
   }
