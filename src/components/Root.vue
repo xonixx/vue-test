@@ -19,7 +19,9 @@
       <div class="controls-group" style="margin-left: 30px">
         <label for="inp">ISIN:</label>
         <input id="inp" type="text" v-model="isinText" placeholder="enter custom"/>
-        <button type="button" :disabled="!isinText">Subscribe</button>
+        <button type="button"
+                :disabled="!isinText"
+                @click="subscribe(isinText)">Subscribe</button>
       </div>
     </div>
     <div class="data">
@@ -32,7 +34,8 @@
         <tr v-for="l in liveData" :key="l.isin">
           <td>{{ l.isin }}</td>
           <td>{{ l.price }}</td>
-          <td></td>
+          <td><button type="button"
+                      @click="unsubscribe(l.isin)">Unsubscribe</button></td>
         </tr>
       </table>
     </div>
@@ -65,17 +68,25 @@ export default {
       this.liveDataM[isin] = row
       this.ws.next({'subscribe': isin})
       this.isin = ''
+      this.isinText = ''
       this.liveData = [ ...this.liveData, row ]
-      this.isinOptionList = ISINs.filter(e => typeof this.liveDataM[e.isin] === 'undefined')
+      this.updateOptions()
     },
 
     unsubscribe (isin) {
+      this.ws.next({'unsubscribe': isin})
+      this.liveData = this.liveData.filter(l => l.isin !== isin)
+      delete this.liveDataM[isin]
+      this.updateOptions()
+    },
 
+    updateOptions () {
+      this.isinOptionList = ISINs.filter(e => typeof this.liveDataM[e.isin] === 'undefined')
     },
 
     onData (data) {
       // console.info(data)
-      const {isin, price} = data;
+      const {isin, price} = data
       this.liveData = this.liveData.map(l => l.isin === isin ? {...l, price} : l)
     }
   },
